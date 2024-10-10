@@ -6,15 +6,23 @@ function CustomNode({ data }) {
     <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400">
       {/* Image in a square box with title below */}
       <div className="flex flex-col items-center">
-        <div className="rounded-md w-16 h-16 flex justify-center items-center bg-gray-100">
+        <div
+          className="rounded-md w-16 h-16 flex justify-center items-center bg-gray-100"
+          style={{ width: "64px", height: "64px" }} // Adjust width and height
+        >
           <img
             src={data.image} // Use data.image to dynamically load the image
             alt={data.name}
             style={{
-              width: "100%",
-              height: "100%",
+              width: "100%", // Ensure the image takes full width
+              height: "100%", // Ensure the image takes full height
               objectFit: "cover",
               borderRadius: "8px",
+            }}
+            onError={(e) => {
+              // Handle image load error (in case of missing URL or broken link)
+              e.target.onerror = null;
+              e.target.src = "https://via.placeholder.com/64"; // Fallback image
             }}
           />
         </div>

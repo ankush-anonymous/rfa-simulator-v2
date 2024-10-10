@@ -2,6 +2,7 @@ import React from "react";
 import Drawer from "@mui/material/Drawer";
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/material";
@@ -11,32 +12,36 @@ import fanImage from "../images/fan.png";
 import batteryImage from "../images/battery.png";
 import switchImage from "../images/switch-off.png";
 
-const drawerWidth = 240; // Sidebar width
+const drawerWidth = 240;
 
 const items = [
   {
     id: 1,
     title: "Bulb",
-    image: bulbImage,
+    image:
+      " https://res.cloudinary.com/dsx8eh1hj/image/upload/v1728535866/rfa-simulator/light-bulb_fw2try.png",
   },
   {
     id: 2,
     title: "Fan",
-    image: fanImage,
+    image:
+      "https://res.cloudinary.com/dsx8eh1hj/image/upload/v1728535867/rfa-simulator/fan_uuidlu.png",
   },
   {
     id: 3,
     title: "Battery",
-    image: batteryImage,
+    image:
+      "https://res.cloudinary.com/dsx8eh1hj/image/upload/v1728535864/rfa-simulator/battery_cwuy11.png",
   },
   {
     id: 4,
     title: "Switch",
-    image: switchImage,
+    image:
+      "https://res.cloudinary.com/dsx8eh1hj/image/upload/v1728535864/rfa-simulator/switch-off_v5zt3h.png",
   },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ addNode }) => {
   return (
     <Drawer
       sx={{
@@ -59,23 +64,23 @@ const Sidebar = () => {
             variant="outlined"
             sx={{
               display: "flex",
-              flexDirection: "row", // Align items horizontally within the button
+              flexDirection: "row",
               alignItems: "center",
-              justifyContent: "flex-start", // Ensure content starts from the left
-              width: "100%", // Full width of sidebar
-              padding: "10px", // Padding inside the button for better spacing
-              marginBottom: "10px", // Spacing between buttons
+              justifyContent: "flex-start",
+              width: "100%",
+              padding: "10px",
+              marginBottom: "10px",
             }}
-            onClick={() => console.log(`${item.title} clicked!`)} // Handle click event
+            onClick={() => addNode.current(item)} // Use addNode ref to pass data
           >
             <img
               src={item.image}
               alt={item.title}
               style={{
-                width: "40px", // Optimal width for the image
-                height: "40px", // Optimal height for the image
-                objectFit: "contain", // Ensure image fits properly
-                marginRight: "20px", // Space between image and text
+                width: "40px",
+                height: "40px",
+                objectFit: "contain",
+                marginRight: "20px",
               }}
             />
             <Typography variant="subtitle1" align="center">

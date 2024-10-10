@@ -17,54 +17,32 @@ const nodeTypes = {
   custom: CustomNode,
 };
 
-const initNodes = [
-  {
-    id: "1",
-    type: "custom",
-    data: { name: "Jane Doe", job: "CEO", emoji: "😎" },
-    position: { x: 100, y: 100 }, // Adjusted position for node 1
-    sourcePosition: Position.Right,
-    targetPosition: Position.Left,
-  },
-  {
-    id: "2",
-    type: "custom",
-    data: { name: "Tyler Weary", job: "Designer", emoji: "🤓" },
-    position: { x: 400, y: 100 }, // Adjusted position for node 2
-    sourcePosition: Position.Right,
-    targetPosition: Position.Left,
-  },
-  {
-    id: "3",
-    type: "custom",
-    data: { name: "Kristi Price", job: "Developer", emoji: "🤩" },
-    position: { x: 700, y: 100 }, // Adjusted position for node 3
-    sourcePosition: Position.Right,
-    targetPosition: Position.Left,
-  },
-];
-
-const initEdges = [
-  {
-    id: "e1-2",
-    source: "1",
-    target: "2",
-  },
-  {
-    id: "e1-3",
-    source: "1",
-    target: "3",
-  },
-];
-
-const Flow = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initEdges);
+const Flow = ({ addNode }) => {
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
     []
   );
+
+  // Pass the addNode function to allow adding nodes dynamically
+  const handleAddNode = useCallback(
+    (data) => {
+      const newNode = {
+        id: (nodes.length + 1).toString(),
+        type: "custom",
+        data: { name: data.title, image: data.image },
+        position: { x: Math.random() * 500, y: Math.random() * 500 },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+      };
+      setNodes((nds) => [...nds, newNode]);
+    },
+    [nodes, setNodes]
+  );
+
+  addNode.current = handleAddNode; // Set the addNode function via ref
 
   return (
     <ReactFlowProvider>
