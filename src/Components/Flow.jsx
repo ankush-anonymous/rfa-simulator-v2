@@ -12,6 +12,8 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/base.css";
 import CustomNode from "./CustomNode";
+import { v4 as uuidv4 } from "uuid"; // Import uuid
+import config from "../util/ComponentConfig";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -20,21 +22,22 @@ const nodeTypes = {
 const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [connections, setConnections] = useState([]); // State to hold all connection details
+  const [connections, setConnections] = useState([]);
 
+  // Updated onConnect to use uuid for edge id
   const onConnect = useCallback(
     (params) => {
-      // Create the edge first
-      const newEdge = addEdge(params, edges);
-      setEdges(newEdge);
+      const newEdge = {
+        ...params,
+        id: uuidv4(), // Generate unique id for edge
+      };
+      setEdges((eds) => addEdge(newEdge, eds));
 
-      // Find the source and target nodes by their IDs
       const sourceNode = nodes.find((node) => node.id === params.source);
       const targetNode = nodes.find((node) => node.id === params.target);
 
-      // Prepare the connection details
       const connectionDetails = {
-        edgeId: newEdge[0].id, // ID of the newly created edge
+        edgeId: newEdge.id, // ID of the newly created edge
         source: {
           title: sourceNode.data.name,
           position: sourceNode.position,
@@ -45,45 +48,57 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
         },
       };
 
-      // Update the connections state
       setConnections((prevConnections) => [
         ...prevConnections,
         connectionDetails,
       ]);
-      console.log("All Connections:", [...connections, connectionDetails]); // Log the updated connections
+      console.log("All Connections:", [...connections, connectionDetails]);
     },
-    [edges, nodes, connections] // Add connections to dependencies
+    [edges, nodes, connections]
   );
 
-  // Pass the addNode function to allow adding nodes dynamically
+  // Updated handleAddNode to use uuid for node id
   const handleAddNode = useCallback(
     (data) => {
+      const nodeConfig = config.items.find(
+        (item) => item.title.toLowerCase() === data.title.toLowerCase()
+      );
+
+      if (!nodeConfig) {
+        console.error(`No configuration found for node type: ${data.title}`);
+        return;
+      }
+
+      const nodeId = uuidv4(); // Generate unique id for node
+
       const newNode = {
-        id: (nodes.length + 1).toString(),
+        id: nodeId,
         type: "custom",
-        data: { name: data.title, image: data.image },
+        data: {
+          id: nodeId, // Add the id to the data object as well
+          name: nodeConfig.title,
+          image: nodeConfig.image,
+          config: nodeConfig.config,
+        },
         position: { x: Math.random() * 500, y: Math.random() * 500 },
         sourcePosition: Position.Right,
         targetPosition: Position.Left,
       };
+
       setNodes((nds) => [...nds, newNode]);
     },
     [nodes, setNodes]
   );
 
-  // Handle node click to track the selected node
   const onNodeClick = (event, node) => {
-    setSelectedNode(node); // Set the selected node
+    setSelectedNode(node);
   };
 
-  // Handle node deletion
   const handleDeleteNode = () => {
     const nodeIdToDelete = selectedNode.id;
 
-    // Remove the selected node
     setNodes((nds) => nds.filter((node) => node.id !== nodeIdToDelete));
 
-    // Remove edges connected to the deleted node
     const edgesToDelete = edges.filter(
       (edge) => edge.source === nodeIdToDelete || edge.target === nodeIdToDelete
     );
@@ -94,7 +109,6 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
       )
     );
 
-    // Update connections by filtering out those involving the deleted node
     setConnections((prevConnections) =>
       prevConnections.filter(
         (connection) =>
@@ -103,11 +117,11 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
       )
     );
 
-    setSelectedNode(null); // Clear selected node after deletion
+    setSelectedNode(null);
   };
 
-  addNode.current = handleAddNode; // Set the addNode function via ref
-  deleteNode.current = handleDeleteNode; // Set deleteNode function via ref
+  addNode.current = handleAddNode;
+  deleteNode.current = handleDeleteNode;
 
   return (
     <ReactFlowProvider>
@@ -118,12 +132,12 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          onNodeClick={onNodeClick} // Track node clicks
+          onNodeClick={onNodeClick}
           nodeTypes={nodeTypes}
           className="bg-teal-50"
-          defaultZoom={0.75} // Set default zoom to 75%
-          zoomOnPinch={true} // Enable zoom on pinch gestures
-          zoomOnDoubleClick={false} // Disable zoom on double click
+          defaultzoom={0.75}
+          zoomOnPinch={true}
+          zoomOnDoubleClick={false}
           fitView={false}
         >
           <Background />
@@ -131,7 +145,6 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
           <Controls />
         </ReactFlow>
       </div>
-      {/* Display current connections in JSON format */}
     </ReactFlowProvider>
   );
 };

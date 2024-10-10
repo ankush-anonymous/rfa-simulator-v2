@@ -6,35 +6,9 @@ import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/material";
+import config from "../util/ComponentConfig"; // Import config
 
 const drawerWidth = 240;
-
-const items = [
-  {
-    id: 1,
-    title: "Bulb",
-    image:
-      " https://res.cloudinary.com/dsx8eh1hj/image/upload/v1728535866/rfa-simulator/light-bulb_fw2try.png",
-  },
-  {
-    id: 2,
-    title: "Fan",
-    image:
-      "https://res.cloudinary.com/dsx8eh1hj/image/upload/v1728535867/rfa-simulator/fan_uuidlu.png",
-  },
-  {
-    id: 3,
-    title: "Battery",
-    image:
-      "https://res.cloudinary.com/dsx8eh1hj/image/upload/v1728535864/rfa-simulator/battery_cwuy11.png",
-  },
-  {
-    id: 4,
-    title: "Switch",
-    image:
-      "https://res.cloudinary.com/dsx8eh1hj/image/upload/v1728535864/rfa-simulator/switch-off_v5zt3h.png",
-  },
-];
 
 const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
   return (
@@ -60,7 +34,7 @@ const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
             <Button
               variant="contained"
               color="primary"
-              disabled={!selectedNode} // Disable if no node is selected
+              disabled={!selectedNode}
               onClick={() => console.log("Configure clicked!")}
             >
               Configure
@@ -70,7 +44,7 @@ const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
             <Button
               variant="contained"
               color="error"
-              disabled={!selectedNode} // Disable if no node is selected
+              disabled={!selectedNode}
               onClick={() => deleteNode.current()}
             >
               Delete
@@ -82,7 +56,7 @@ const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
       <Divider />
 
       <Box sx={{ padding: 2 }}>
-        {items.map((item) => (
+        {config.items.map((item) => (
           <Button
             key={item.id}
             variant="outlined"
