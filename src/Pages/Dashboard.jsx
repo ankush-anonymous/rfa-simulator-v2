@@ -1,10 +1,12 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Box } from "@mui/material";
-import Flow from "../Components/Flow"; // Assuming Flow is in the same directory
-import Sidebar from "../Components/Sidebar"; // Assuming Sidebar is in the same directory
+import Flow from "../Components/Flow";
+import Sidebar from "../Components/Sidebar";
 
 const Dashboard = () => {
-  const addNode = useRef(null); // Create a ref to store the addNode function
+  const addNode = useRef(null); // Reference to addNode function
+  const deleteNode = useRef(null); // Reference to deleteNode function
+  const [selectedNode, setSelectedNode] = useState(null); // Track selected node
 
   return (
     <Box
@@ -22,8 +24,12 @@ const Dashboard = () => {
           backgroundColor: "#f5f5f5", // Light background color for flow area
         }}
       >
-        {/* Pass the addNode ref to the Flow component */}
-        <Flow addNode={addNode} />
+        <Flow
+          addNode={addNode}
+          selectedNode={selectedNode}
+          setSelectedNode={setSelectedNode}
+          deleteNode={deleteNode}
+        />
       </Box>
 
       {/* Sidebar component with a max width */}
@@ -35,8 +41,11 @@ const Dashboard = () => {
           borderLeft: "1px solid #ddd", // Optional border to separate sections
         }}
       >
-        {/* Pass the addNode ref to the Sidebar component */}
-        <Sidebar addNode={addNode} />
+        <Sidebar
+          addNode={addNode}
+          selectedNode={selectedNode}
+          deleteNode={deleteNode}
+        />
       </Box>
     </Box>
   );

@@ -7,11 +7,6 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/material";
 
-import bulbImage from "../images/light-bulb.png";
-import fanImage from "../images/fan.png";
-import batteryImage from "../images/battery.png";
-import switchImage from "../images/switch-off.png";
-
 const drawerWidth = 240;
 
 const items = [
@@ -41,7 +36,7 @@ const items = [
   },
 ];
 
-const Sidebar = ({ addNode }) => {
+const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
   return (
     <Drawer
       sx={{
@@ -57,6 +52,35 @@ const Sidebar = ({ addNode }) => {
     >
       <Toolbar />
       <Divider />
+
+      {/* Add "Configure" and "Delete" buttons */}
+      <Box sx={{ padding: 2 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={7}>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={!selectedNode} // Disable if no node is selected
+              onClick={() => console.log("Configure clicked!")}
+            >
+              Configure
+            </Button>
+          </Grid>
+          <Grid item xs={2}>
+            <Button
+              variant="contained"
+              color="error"
+              disabled={!selectedNode} // Disable if no node is selected
+              onClick={() => deleteNode.current()}
+            >
+              Delete
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+
+      <Divider />
+
       <Box sx={{ padding: 2 }}>
         {items.map((item) => (
           <Button
@@ -89,6 +113,7 @@ const Sidebar = ({ addNode }) => {
           </Button>
         ))}
       </Box>
+
       <Divider />
     </Drawer>
   );
