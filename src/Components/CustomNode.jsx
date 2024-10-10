@@ -4,10 +4,13 @@ import { Handle, Position } from "@xyflow/react";
 function CustomNode({ data }) {
   const config = data.config || {}; // Fallback to an empty object if config is undefined
   const properties = config.properties || {}; // Fallback to an empty object if properties are undefined
-  console.log(data);
 
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400">
+    <div
+      className={`px-4 py-2 shadow-md rounded-md bg-white border-2 ${
+        data.isSelected ? "border-blue-500" : "border-stone-400"
+      }`} // Apply blue border if selected
+    >
       <div className="flex flex-col items-center">
         <div className="rounded-md w-16 h-16 flex justify-center items-center bg-gray-100">
           <img
@@ -28,7 +31,7 @@ function CustomNode({ data }) {
         <div className="mt-2 text-center">
           <div className="text-lg font-bold">{data.name}</div>
           {/* Only display config details if they exist */}
-          {config.type && (
+          {config && (
             <>
               <div className="text-sm">{`Type: ${config.type}`}</div>
               {properties.power && (

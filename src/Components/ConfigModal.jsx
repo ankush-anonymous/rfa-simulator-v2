@@ -1,126 +1,142 @@
 import React, { useState, useEffect } from "react";
-import { Box, Modal, TextField, Typography, Button } from "@mui/material";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Grid from "@mui/material/Grid";
 
-const ConfigModal = ({ open, onClose, selectedNode, onSave }) => {
-  const [config, setConfig] = useState({});
+const ConfigModal = ({ open, onClose, selectedNode }) => {
+  const [properties, setProperties] = useState({});
 
   useEffect(() => {
     if (selectedNode) {
-      // Set the current config values when the modal opens
-      setConfig(selectedNode.data.config.properties);
+      // Initialize properties with the selected node's data
+      setProperties(selectedNode.data.config.properties);
     }
   }, [selectedNode]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      [name]: value,
-    }));
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setProperties((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSave = () => {
-    onSave(selectedNode.id, config);
+    console.log("Saved Properties:", properties);
+    // Implement your save logic here
     onClose(); // Close the modal after saving
   };
 
-  if (!selectedNode) return null;
+  const renderProperties = () => {
+    switch (selectedNode.data.name.toLowerCase()) {
+      case "fan":
+      case "bulb":
+        return (
+          <>
+            <TextField
+              label="Type"
+              name="type"
+              value={properties.type || ""}
+              onChange={handleChange}
+              select
+              fullWidth
+              margin="normal"
+            >
+              <MenuItem value="AC">AC</MenuItem>
+              <MenuItem value="DC">DC</MenuItem>
+            </TextField>
+            <TextField
+              label="Power"
+              name="power"
+              value={properties.power || ""}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            />
+          </>
+        );
 
-  const { id, data } = selectedNode;
-  const { name, image, config: nodeConfig } = data;
+      case "battery":
+        return (
+          <>
+            <TextField
+              label="Type"
+              name="type"
+              value={properties.type || ""}
+              onChange={handleChange}
+              select
+              fullWidth
+              margin="normal"
+            >
+              <MenuItem value="LiOn">LiOn</MenuItem>
+              <MenuItem value="LiPo">LiPo</MenuItem>
+            </TextField>
+            <TextField
+              label="Voltage Rating"
+              name="voltageRating"
+              value={properties.voltageRating || ""}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Capacity"
+              name="capacity"
+              value={properties.capacity || ""}
+              onChange={handleChange}
+              fullWidth
+              margin="normal"
+            />
+          </>
+        );
+
+      default:
+        return null; // Return null for unsupported types
+    }
+  };
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "background.paper",
-          boxShadow: 24,
-          p: 4,
-        }}
-      >
-        <Typography variant="h6" component="h2">
-          Configure Node
-        </Typography>
-
-        <Box mt={2}>
-          <Typography variant="body1">ID: {id}</Typography>
-          <Typography variant="body1">Type: {nodeConfig.type}</Typography>
-
-          <Box mt={2}>
-            <img
-              src={image}
-              alt={name}
-              style={{ width: "100px", height: "100px", objectFit: "cover" }}
-            />
-          </Box>
-
-          <Box mt={2}>
-            <Typography variant="body1">Properties:</Typography>
-
-            {/* Render input fields based on node type */}
-            {nodeConfig.properties.type && (
-              <TextField
-                fullWidth
-                label="Type"
-                name="type"
-                value={config.type || ""}
-                onChange={handleChange}
-                margin="normal"
-              />
-            )}
-            {nodeConfig.properties.power && (
-              <TextField
-                fullWidth
-                label="Power"
-                name="power"
-                value={config.power || ""}
-                onChange={handleChange}
-                margin="normal"
-              />
-            )}
-            {nodeConfig.properties.voltageRating && (
-              <TextField
-                fullWidth
-                label="Voltage Rating"
-                name="voltageRating"
-                value={config.voltageRating || ""}
-                onChange={handleChange}
-                margin="normal"
-              />
-            )}
-            {nodeConfig.properties.capacity && (
-              <TextField
-                fullWidth
-                label="Capacity"
-                name="capacity"
-                value={config.capacity || ""}
-                onChange={handleChange}
-                margin="normal"
-              />
-            )}
-          </Box>
-
-          <Box mt={3}>
-            <Button variant="contained" color="primary" onClick={handleSave}>
-              Save
-            </Button>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={onClose}
-              style={{ marginLeft: 8 }}
-            >
-              Cancel
-            </Button>
-          </Box>
-        </Box>
-      </Box>
-    </Modal>
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>
+        {selectedNode ? selectedNode.data.name : "Configure Node"}
+      </DialogTitle>
+      <DialogContent>
+        {selectedNode && (
+          <>
+            <Grid container alignItems="center" spacing={2}>
+              <Grid item xs>
+                <Typography variant="body1">
+                  ID: {selectedNode.data.id}
+                </Typography>
+              </Grid>
+              <Grid item>
+                <img
+                  src={selectedNode.data.image}
+                  alt={selectedNode.data.name}
+                  style={{ width: "40px", height: "40px" }}
+                />
+              </Grid>
+            </Grid>
+            <Typography variant="h6" style={{ marginTop: "20px" }}>
+              Properties:
+            </Typography>
+            {renderProperties()} {/* Render properties based on node type */}
+          </>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="secondary">
+          Cancel
+        </Button>
+        <Button onClick={handleSave} color="primary">
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

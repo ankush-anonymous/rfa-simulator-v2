@@ -23,6 +23,7 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [connections, setConnections] = useState([]);
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
 
   // Updated onConnect to use uuid for edge id
   const onConnect = useCallback(
@@ -92,6 +93,7 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
 
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
+    setSelectedNodeId(node.id); // Store the selected node ID
   };
 
   const handleDeleteNode = () => {
@@ -127,7 +129,13 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
     <ReactFlowProvider>
       <div style={{ height: "100%", width: "100%" }}>
         <ReactFlow
-          nodes={nodes}
+          nodes={nodes.map((node) => ({
+            ...node,
+            data: {
+              ...node.data,
+              isSelected: node.id === selectedNodeId, // Pass isSelected prop to the node's data
+            },
+          }))}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
