@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import Flow from "../Components/Flow";
 import Sidebar from "../Components/Sidebar";
@@ -7,6 +7,12 @@ const Dashboard = () => {
   const addNode = useRef(null); // Reference to addNode function
   const deleteNode = useRef(null); // Reference to deleteNode function
   const [selectedNode, setSelectedNode] = useState(null); // Track selected node
+  const [nodes, setNodes] = useState([]); // State to track all nodes
+
+  useEffect(() => {
+    // Clear localStorage on page load
+    localStorage.clear();
+  }, []);
 
   return (
     <Box
@@ -29,6 +35,7 @@ const Dashboard = () => {
           selectedNode={selectedNode}
           setSelectedNode={setSelectedNode}
           deleteNode={deleteNode}
+          setNodes={setNodes} // Pass setNodes to Flow
         />
       </Box>
 
@@ -45,6 +52,7 @@ const Dashboard = () => {
           addNode={addNode}
           selectedNode={selectedNode}
           deleteNode={deleteNode}
+          setNodes={setNodes} // Pass setNodes to Sidebar
         />
       </Box>
     </Box>

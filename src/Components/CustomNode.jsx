@@ -1,8 +1,24 @@
-import React, { memo } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 
 function CustomNode({ data }) {
-  const config = data.config || {}; // Fallback to an empty object if config is undefined
+  const [nodeData, setNodeData] = useState(data); // Track node data locally
+
+  useEffect(() => {
+    // Fetch updated node data from localStorage whenever this component renders
+    const flowData = JSON.parse(localStorage.getItem("flowData"));
+    if (flowData && flowData.nodes) {
+      const updatedNode = flowData.nodes.find((node) => node.id === data.id);
+      if (updatedNode) {
+        setNodeData((prevData) => ({
+          ...prevData,
+          config: updatedNode.config || prevData.config, // Update config if exists
+        }));
+      }
+    }
+  }, [data.id]); // Run whenever the node's id changes
+
+  const config = nodeData.config || {}; // Fallback to an empty object if config is undefined
   const properties = config.properties || {}; // Fallback to an empty object if properties are undefined
 
   return (
@@ -14,8 +30,8 @@ function CustomNode({ data }) {
       <div className="flex flex-col items-center">
         <div className="rounded-md w-16 h-16 flex justify-center items-center bg-gray-100">
           <img
-            src={data.image}
-            alt={data.name}
+            src={nodeData.image}
+            alt={nodeData.name}
             style={{
               width: "100%",
               height: "100%",
@@ -29,7 +45,7 @@ function CustomNode({ data }) {
           />
         </div>
         <div className="mt-2 text-center">
-          <div className="text-lg font-bold">{data.name}</div>
+          <div className="text-lg font-bold">{nodeData.name}</div>
           {/* Only display config details if they exist */}
           {config && (
             <>

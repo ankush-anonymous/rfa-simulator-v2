@@ -25,40 +25,62 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
   const [connections, setConnections] = useState([]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
 
-  // Updated onConnect to use uuid for edge id
   const onConnect = useCallback(
     (params) => {
       const newEdge = {
         ...params,
         id: uuidv4(), // Generate unique id for edge
       };
+
+      // 1. Add the new edge to the state
       setEdges((eds) => addEdge(newEdge, eds));
 
+      // 2. Find the source and target nodes from the existing nodes
       const sourceNode = nodes.find((node) => node.id === params.source);
       const targetNode = nodes.find((node) => node.id === params.target);
 
       const connectionDetails = {
-        edgeId: newEdge.id, // ID of the newly created edge
+        edgeId: newEdge.id,
         source: {
+          id: sourceNode.id,
           title: sourceNode.data.name,
           position: sourceNode.position,
         },
         target: {
+          id: targetNode.id,
           title: targetNode.data.name,
           position: targetNode.position,
         },
       };
 
+      // 3. Update connections in state
       setConnections((prevConnections) => [
         ...prevConnections,
         connectionDetails,
       ]);
+
+      // 4. Update localStorage with connection details
+      const flowData = JSON.parse(localStorage.getItem("flowData")) || {
+        nodes: [],
+        connections: [],
+      };
+
+      const updatedFlowData = {
+        ...flowData,
+        connections: [
+          ...flowData.connections,
+          { source: sourceNode.id, target: targetNode.id },
+        ],
+      };
+
+      // 5. Save the updated data to localStorage
+      localStorage.setItem("flowData", JSON.stringify(updatedFlowData));
+
       console.log("All Connections:", [...connections, connectionDetails]);
     },
     [edges, nodes, connections]
   );
 
-  // Updated handleAddNode to use uuid for node id
   const handleAddNode = useCallback(
     (data) => {
       const nodeConfig = config.items.find(
@@ -76,7 +98,7 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
         id: nodeId,
         type: "custom",
         data: {
-          id: nodeId, // Add the id to the data object as well
+          id: nodeId,
           name: nodeConfig.title,
           image: nodeConfig.image,
           config: nodeConfig.config,
@@ -86,10 +108,54 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
         targetPosition: Position.Left,
       };
 
+      // Update nodes state
       setNodes((nds) => [...nds, newNode]);
+
+      // Save node to localStorage
+      saveNodeToLocalStorage(newNode);
     },
-    [nodes, setNodes]
+    [setNodes]
   );
+
+  const saveNodeToLocalStorage = (node) => {
+    // Get existing data from localStorage or initialize nodes and connections arrays
+    const existingData = localStorage.getItem("flowData");
+    let parsedData = existingData
+      ? JSON.parse(existingData)
+      : { nodes: [], connections: [] };
+
+    // Ensure both nodes and connections arrays exist
+    parsedData.nodes = parsedData.nodes || [];
+    parsedData.connections = parsedData.connections || [];
+
+    // Check if node already exists, if yes update it, otherwise add a new one
+    const existingNodeIndex = parsedData.nodes.findIndex(
+      (n) => n.id === node.id
+    );
+
+    if (existingNodeIndex >= 0) {
+      // Update existing node
+      parsedData.nodes[existingNodeIndex] = {
+        id: node.id,
+        name: node.data.name,
+        image: node.data.image,
+        config: node.data.config,
+        position: node.position,
+      };
+    } else {
+      // Add new node to the nodes array
+      parsedData.nodes.push({
+        id: node.id,
+        name: node.data.name,
+        image: node.data.image,
+        config: node.data.config,
+        position: node.position,
+      });
+    }
+
+    // Save the updated data back to localStorage
+    localStorage.setItem("flowData", JSON.stringify(parsedData));
+  };
 
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
@@ -99,11 +165,10 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
   const handleDeleteNode = () => {
     const nodeIdToDelete = selectedNode.id;
 
+    // 1. Remove node from state
     setNodes((nds) => nds.filter((node) => node.id !== nodeIdToDelete));
 
-    const edgesToDelete = edges.filter(
-      (edge) => edge.source === nodeIdToDelete || edge.target === nodeIdToDelete
-    );
+    // 2. Remove edges related to this node
     setEdges((eds) =>
       eds.filter(
         (edge) =>
@@ -111,6 +176,7 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
       )
     );
 
+    // 3. Remove connections involving this node
     setConnections((prevConnections) =>
       prevConnections.filter(
         (connection) =>
@@ -119,6 +185,23 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
       )
     );
 
+    // 4. Remove node from localStorage
+    const flowData = JSON.parse(localStorage.getItem("flowData"));
+
+    if (flowData) {
+      const updatedNodes = flowData.nodes.filter(
+        (node) => node.id !== nodeIdToDelete
+      );
+      const updatedData = {
+        ...flowData,
+        nodes: updatedNodes,
+      };
+
+      // Update the localStorage with the remaining nodes
+      localStorage.setItem("flowData", JSON.stringify(updatedData));
+    }
+
+    // 5. Clear selected node
     setSelectedNode(null);
   };
 
@@ -133,7 +216,7 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
             ...node,
             data: {
               ...node.data,
-              isSelected: node.id === selectedNodeId, // Pass isSelected prop to the node's data
+              isSelected: node.id === selectedNodeId,
             },
           }))}
           edges={edges}

@@ -10,7 +10,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Grid from "@mui/material/Grid";
 
-const ConfigModal = ({ open, onClose, selectedNode }) => {
+const ConfigModal = ({ open, onClose, selectedNode, setNodes }) => {
   const [properties, setProperties] = useState({});
 
   useEffect(() => {
@@ -26,8 +26,56 @@ const ConfigModal = ({ open, onClose, selectedNode }) => {
   };
 
   const handleSave = () => {
-    console.log("Saved Properties:", properties);
-    // Implement your save logic here
+    if (selectedNode) {
+      const nodeId = selectedNode.data.id;
+
+      // Retrieve existing flowData from localStorage
+      const flowData = JSON.parse(localStorage.getItem("flowData")) || {
+        nodes: [],
+        connections: [],
+      };
+
+      // Find the node in the stored data by its ID
+      const updatedNodes = flowData.nodes.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            config: {
+              ...node.config,
+              properties: properties, // Update the properties
+            },
+          };
+        }
+        return node;
+      });
+
+      // Save the updated flowData back to localStorage
+      const updatedFlowData = { ...flowData, nodes: updatedNodes };
+      localStorage.setItem("flowData", JSON.stringify(updatedFlowData));
+
+      // Also update the `nodes` state in the parent component (Flow)
+      setNodes((prevNodes) =>
+        prevNodes.map((node) => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                config: {
+                  ...node.data.config,
+                  properties: properties, // Update properties in node state
+                },
+              },
+            };
+          }
+          return node;
+        })
+      );
+
+      console.log("Updated Properties:", properties);
+      console.log("Updated flowData:", updatedFlowData);
+    }
+
     onClose(); // Close the modal after saving
   };
 

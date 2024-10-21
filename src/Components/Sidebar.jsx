@@ -8,11 +8,13 @@ import Typography from "@mui/material/Typography";
 import { Box } from "@mui/material";
 import config from "../util/ComponentConfig"; // Import config
 import ConfigureModal from "../Components/ConfigModal"; // Import the modal
+import { main } from "../util/langFlow"; // Import the main function
 
 const drawerWidth = 240;
 
-const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
+const Sidebar = ({ addNode, selectedNode, deleteNode, setNodes }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [output, setOutput] = useState(""); // State to store the output
 
   const handleConfigureClick = () => {
     setIsModalOpen(true);
@@ -20,6 +22,18 @@ const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
+  };
+
+  // Handler for Calculate button click
+  const handleCalculateClick = async () => {
+    try {
+      // Trigger the main function and capture the output
+      const result = await main("Your input value here");
+      // Store the output in state
+      setOutput(result);
+    } catch (error) {
+      console.error("Error during calculation:", error);
+    }
   };
 
   return (
@@ -39,7 +53,6 @@ const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
         <Toolbar />
         <Divider />
 
-        {/* Add "Configure" and "Delete" buttons */}
         <Box sx={{ padding: 2 }}>
           <Grid container spacing={2}>
             <Grid item xs={7}>
@@ -81,7 +94,7 @@ const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
                 padding: "10px",
                 marginBottom: "10px",
               }}
-              onClick={() => addNode.current(item)} // Use addNode ref to pass data
+              onClick={() => addNode.current(item)}
             >
               <img
                 src={item.image}
@@ -101,6 +114,28 @@ const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
         </Box>
 
         <Divider />
+
+        {/* Add the Calculate button */}
+        <Box sx={{ padding: 2 }}>
+          <Button
+            id="calculate-btn"
+            variant="contained"
+            color="success"
+            onClick={handleCalculateClick} // Calculate button triggers the main function
+          >
+            Calculate
+          </Button>
+
+          {/* Display the output below the Calculate button */}
+          {output && (
+            <Box sx={{ marginTop: 2 }}>
+              <Typography variant="h6">Output:</Typography>
+              <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+                {JSON.stringify(output, null, 2)}
+              </pre>
+            </Box>
+          )}
+        </Box>
       </Drawer>
 
       {/* Configure Modal */}
@@ -108,6 +143,7 @@ const Sidebar = ({ addNode, selectedNode, deleteNode }) => {
         open={isModalOpen}
         onClose={handleModalClose}
         selectedNode={selectedNode}
+        setNodes={setNodes} // Pass setNodes to ConfigModal
       />
     </>
   );
