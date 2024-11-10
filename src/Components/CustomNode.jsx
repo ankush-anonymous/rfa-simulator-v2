@@ -5,18 +5,14 @@ function CustomNode({ data }) {
   const [nodeData, setNodeData] = useState(data); // Track node data locally
 
   useEffect(() => {
-    // Fetch updated node data from localStorage whenever this component renders
     const flowData = JSON.parse(localStorage.getItem("flowData"));
     if (flowData && flowData.nodes) {
       const updatedNode = flowData.nodes.find((node) => node.id === data.id);
       if (updatedNode) {
-        setNodeData((prevData) => ({
-          ...prevData,
-          config: updatedNode.config || prevData.config, // Update config if exists
-        }));
+        setNodeData(updatedNode); // Update node data from localStorage
       }
     }
-  }, [data.id]); // Run whenever the node's id changes
+  }, [data.id]); // Only run when data.id changes
 
   const config = nodeData.config || {}; // Fallback to an empty object if config is undefined
   const properties = config.properties || {}; // Fallback to an empty object if properties are undefined

@@ -29,13 +29,14 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
     (params) => {
       const newEdge = {
         ...params,
-        id: uuidv4(), // Generate unique id for edge
+        id: uuidv4(), // Generate a unique id for the edge
+        type: "step", // Set edge type to 'step'
       };
 
-      // 1. Add the new edge to the state
+      // Add the new edge to the state
       setEdges((eds) => addEdge(newEdge, eds));
 
-      // 2. Find the source and target nodes from the existing nodes
+      // Find the source and target nodes from the existing nodes
       const sourceNode = nodes.find((node) => node.id === params.source);
       const targetNode = nodes.find((node) => node.id === params.target);
 
@@ -53,13 +54,13 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
         },
       };
 
-      // 3. Update connections in state
+      // Update connections in state
       setConnections((prevConnections) => [
         ...prevConnections,
         connectionDetails,
       ]);
 
-      // 4. Update localStorage with connection details
+      // Update localStorage with connection details
       const flowData = JSON.parse(localStorage.getItem("flowData")) || {
         nodes: [],
         connections: [],
@@ -73,9 +74,7 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
         ],
       };
 
-      // 5. Save the updated data to localStorage
       localStorage.setItem("flowData", JSON.stringify(updatedFlowData));
-
       console.log("All Connections:", [...connections, connectionDetails]);
     },
     [edges, nodes, connections]

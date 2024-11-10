@@ -35,7 +35,7 @@ const ConfigModal = ({ open, onClose, selectedNode, setNodes }) => {
         connections: [],
       };
 
-      // Find the node in the stored data by its ID
+      // Find the node in the stored data by its ID and update it
       const updatedNodes = flowData.nodes.map((node) => {
         if (node.id === nodeId) {
           return {
@@ -53,7 +53,7 @@ const ConfigModal = ({ open, onClose, selectedNode, setNodes }) => {
       const updatedFlowData = { ...flowData, nodes: updatedNodes };
       localStorage.setItem("flowData", JSON.stringify(updatedFlowData));
 
-      // Also update the `nodes` state in the parent component (Flow)
+      // Update the nodes state in the Flow component to trigger re-render
       setNodes((prevNodes) =>
         prevNodes.map((node) => {
           if (node.id === nodeId) {
