@@ -8,7 +8,8 @@ import Typography from "@mui/material/Typography";
 import { Box } from "@mui/material";
 import config from "../util/ComponentConfig"; // Import config
 import ConfigureModal from "../Components/ConfigModal"; // Import the modal
-import { main } from "../util/langFlow"; // Import the main function
+import { main } from "../util/groqCloud"; // Import the main function
+// import { main } from "../util/temp"; // Import the main function
 
 const drawerWidth = 240;
 
@@ -25,14 +26,25 @@ const Sidebar = ({ addNode, selectedNode, deleteNode, setNodes }) => {
   };
 
   // Handler for Calculate button click
+  // const handleCalculateClick = async () => {
+  //   try {
+  //     // Trigger the main function and capture the output
+  //     const result = await main("Your input value here");
+  //     // Store the output in state
+  //     setOutput(result);
+  //   } catch (error) {
+  //     console.error("Error during calculation:", error);
+  //   }
+  // };
+
   const handleCalculateClick = async () => {
     try {
-      // Trigger the main function and capture the output
-      const result = await main("Your input value here");
-      // Store the output in state
-      setOutput(result);
+      const inputValue = "Your JSON input here"; // Replace this with actual input data
+      const result = await main(inputValue);
+      console.log("Received response:", result);
+      // Handle the result as needed (e.g., display in the UI)
     } catch (error) {
-      console.error("Error during calculation:", error);
+      console.error("Error during simulation:", error.message);
     }
   };
 
