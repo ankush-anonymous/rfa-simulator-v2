@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -12,31 +12,46 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/base.css";
 import CustomNode from "./CustomNode";
-import { v4 as uuidv4 } from "uuid"; // Import uuid
 import config from "../util/ComponentConfig";
 
 const nodeTypes = {
   custom: CustomNode,
 };
 
-const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
+const Flow = ({
+  addNode,
+  selectedNode,
+  setSelectedNode,
+  deleteNode,
+  jsonInput,
+}) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [connections, setConnections] = useState([]);
   const [selectedNodeId, setSelectedNodeId] = useState(null);
+  const [nodeCounts, setNodeCounts] = useState({}); // Track counts for each node type
+
+  // Generate a sequential ID based on the node title (e.g., fan1, battery2)
+  const generateNodeId = (title) => {
+    const currentCount = nodeCounts[title] || 0;
+    const newCount = currentCount + 1;
+    setNodeCounts((prevCounts) => ({
+      ...prevCounts,
+      [title]: newCount,
+    }));
+    return `${title.toLowerCase()}${newCount}`;
+  };
 
   const onConnect = useCallback(
     (params) => {
       const newEdge = {
         ...params,
-        id: uuidv4(), // Generate a unique id for the edge
-        type: "step", // Set edge type to 'step'
+        id: generateNodeId("edge"), // Generate a unique id for the edge
+        type: "step",
       };
 
-      // Add the new edge to the state
       setEdges((eds) => addEdge(newEdge, eds));
 
-      // Find the source and target nodes from the existing nodes
       const sourceNode = nodes.find((node) => node.id === params.source);
       const targetNode = nodes.find((node) => node.id === params.target);
 
@@ -54,18 +69,15 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
         },
       };
 
-      // Update connections in state
       setConnections((prevConnections) => [
         ...prevConnections,
         connectionDetails,
       ]);
 
-      // Update localStorage with connection details
       const flowData = JSON.parse(localStorage.getItem("flowData")) || {
         nodes: [],
         connections: [],
       };
-
       const updatedFlowData = {
         ...flowData,
         connections: [
@@ -91,7 +103,7 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
         return;
       }
 
-      const nodeId = uuidv4(); // Generate unique id for node
+      const nodeId = generateNodeId(nodeConfig.title); // Generate custom id
 
       const newNode = {
         id: nodeId,
@@ -107,67 +119,46 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
         targetPosition: Position.Left,
       };
 
-      // Update nodes state
       setNodes((nds) => [...nds, newNode]);
-
-      // Save node to localStorage
       saveNodeToLocalStorage(newNode);
     },
-    [setNodes]
+    [setNodes, nodeCounts]
   );
 
   const saveNodeToLocalStorage = (node) => {
-    // Get existing data from localStorage or initialize nodes and connections arrays
-    const existingData = localStorage.getItem("flowData");
-    let parsedData = existingData
-      ? JSON.parse(existingData)
-      : { nodes: [], connections: [] };
+    const flowData = JSON.parse(localStorage.getItem("flowData")) || {
+      nodes: [],
+      connections: [],
+    };
 
-    // Ensure both nodes and connections arrays exist
-    parsedData.nodes = parsedData.nodes || [];
-    parsedData.connections = parsedData.connections || [];
+    // Format the node data according to the required format
+    const {
+      id,
+      data: { name, image, config },
+    } = node;
+    const formattedNode = { id, name, image, config };
 
-    // Check if node already exists, if yes update it, otherwise add a new one
-    const existingNodeIndex = parsedData.nodes.findIndex(
-      (n) => n.id === node.id
-    );
-
+    // Check if the node already exists in the stored data and update it, otherwise add it
+    const existingNodeIndex = flowData.nodes.findIndex((n) => n.id === node.id);
     if (existingNodeIndex >= 0) {
-      // Update existing node
-      parsedData.nodes[existingNodeIndex] = {
-        id: node.id,
-        name: node.data.name,
-        image: node.data.image,
-        config: node.data.config,
-        position: node.position,
-      };
+      flowData.nodes[existingNodeIndex] = formattedNode;
     } else {
-      // Add new node to the nodes array
-      parsedData.nodes.push({
-        id: node.id,
-        name: node.data.name,
-        image: node.data.image,
-        config: node.data.config,
-        position: node.position,
-      });
+      flowData.nodes.push(formattedNode);
     }
 
-    // Save the updated data back to localStorage
-    localStorage.setItem("flowData", JSON.stringify(parsedData));
+    localStorage.setItem("flowData", JSON.stringify(flowData));
   };
 
   const onNodeClick = (event, node) => {
     setSelectedNode(node);
-    setSelectedNodeId(node.id); // Store the selected node ID
+    setSelectedNodeId(node.id);
   };
 
   const handleDeleteNode = () => {
     const nodeIdToDelete = selectedNode.id;
 
-    // 1. Remove node from state
+    // Update nodes and edges by removing those associated with the deleted node
     setNodes((nds) => nds.filter((node) => node.id !== nodeIdToDelete));
-
-    // 2. Remove edges related to this node
     setEdges((eds) =>
       eds.filter(
         (edge) =>
@@ -175,34 +166,94 @@ const Flow = ({ addNode, selectedNode, setSelectedNode, deleteNode }) => {
       )
     );
 
-    // 3. Remove connections involving this node
+    // Remove connections associated with the deleted node
     setConnections((prevConnections) =>
       prevConnections.filter(
         (connection) =>
-          connection.source.title !== selectedNode.data.name &&
-          connection.target.title !== selectedNode.data.name
+          connection.source.id !== nodeIdToDelete &&
+          connection.target.id !== nodeIdToDelete
       )
     );
 
-    // 4. Remove node from localStorage
+    // Update localStorage data
     const flowData = JSON.parse(localStorage.getItem("flowData"));
-
     if (flowData) {
       const updatedNodes = flowData.nodes.filter(
         (node) => node.id !== nodeIdToDelete
       );
+      const updatedConnections = flowData.connections.filter(
+        (connection) =>
+          connection.source !== nodeIdToDelete &&
+          connection.target !== nodeIdToDelete
+      );
       const updatedData = {
         ...flowData,
         nodes: updatedNodes,
+        connections: updatedConnections,
       };
-
-      // Update the localStorage with the remaining nodes
       localStorage.setItem("flowData", JSON.stringify(updatedData));
     }
 
-    // 5. Clear selected node
     setSelectedNode(null);
   };
+
+  const handleAddNodeFromJson = useCallback(
+    (jsonNode) => {
+      const nodeConfig = config.items.find(
+        (item) => item.title.toLowerCase() === jsonNode.name.toLowerCase()
+      );
+
+      if (!nodeConfig) return;
+
+      const newNode = {
+        id: jsonNode.id,
+        type: "custom",
+        data: {
+          id: jsonNode.id,
+          name: jsonNode.name,
+          image: jsonNode.image,
+          config: jsonNode.config,
+        },
+        position: { x: Math.random() * 500, y: Math.random() * 500 },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+      };
+
+      setNodes((nds) => [...nds, newNode]);
+
+      // Save to flowData in localStorage
+      const flowData = JSON.parse(localStorage.getItem("flowData")) || {
+        nodes: [],
+        connections: [],
+      };
+
+      // Check if the node already exists in the stored data
+      const existingNodeIndex = flowData.nodes.findIndex(
+        (n) => n.id === newNode.id
+      );
+      if (existingNodeIndex >= 0) {
+        flowData.nodes[existingNodeIndex] = newNode.data;
+      } else {
+        flowData.nodes.push({
+          id: newNode.id,
+          name: newNode.data.name,
+          image: newNode.data.image,
+          config: newNode.data.config,
+        });
+      }
+
+      localStorage.setItem("flowData", JSON.stringify(flowData));
+    },
+    [setNodes]
+  );
+
+  useEffect(() => {
+    if (jsonInput && jsonInput.nodes) {
+      jsonInput.nodes.forEach((jsonNode) => {
+        handleAddNodeFromJson(jsonNode);
+      });
+    }
+  }, [jsonInput, handleAddNodeFromJson]);
 
   addNode.current = handleAddNode;
   deleteNode.current = handleDeleteNode;

@@ -5,17 +5,24 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
 import { Box } from "@mui/material";
 import config from "../util/ComponentConfig"; // Import config
 import ConfigureModal from "../Components/ConfigModal"; // Import the modal
 import { main } from "../util/groqCloud"; // Import the main function
-// import { main } from "../util/temp"; // Import the main function
 
 const drawerWidth = 240;
 
-const Sidebar = ({ addNode, selectedNode, deleteNode, setNodes }) => {
+const Sidebar = ({
+  addNode,
+  selectedNode,
+  deleteNode,
+  setNodes,
+  setJsonInput,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [output, setOutput] = useState(""); // State to store the output
+  const [textInput, setTextInput] = useState(""); // State for text area input
 
   const handleConfigureClick = () => {
     setIsModalOpen(true);
@@ -25,26 +32,21 @@ const Sidebar = ({ addNode, selectedNode, deleteNode, setNodes }) => {
     setIsModalOpen(false);
   };
 
-  // Handler for Calculate button click
-  // const handleCalculateClick = async () => {
-  //   try {
-  //     // Trigger the main function and capture the output
-  //     const result = await main("Your input value here");
-  //     // Store the output in state
-  //     setOutput(result);
-  //   } catch (error) {
-  //     console.error("Error during calculation:", error);
-  //   }
-  // };
-
   const handleCalculateClick = async () => {
     try {
-      const inputValue = "Your JSON input here"; // Replace this with actual input data
-      const result = await main(inputValue);
-      console.log("Received response:", result);
-      // Handle the result as needed (e.g., display in the UI)
+      const result = await main(textInput); // Pass textInput as the input value
+      setOutput(result); // Store the output in state
     } catch (error) {
-      console.error("Error during simulation:", error.message);
+      console.error("Error during calculation:", error);
+    }
+  };
+
+  const handleImportClick = () => {
+    try {
+      const parsedJson = JSON.parse(textInput);
+      setJsonInput(parsedJson); // Send JSON data to Dashboard
+    } catch (error) {
+      console.error("Invalid JSON format", error);
     }
   };
 
@@ -127,7 +129,7 @@ const Sidebar = ({ addNode, selectedNode, deleteNode, setNodes }) => {
 
         <Divider />
 
-        {/* Add the Calculate button */}
+        {/* Calculate Button, Text Area, and Import Button */}
         <Box sx={{ padding: 2 }}>
           <Button
             id="calculate-btn"
@@ -147,6 +149,28 @@ const Sidebar = ({ addNode, selectedNode, deleteNode, setNodes }) => {
               </pre>
             </Box>
           )}
+
+          {/* Text Area for input */}
+          <TextField
+            label="Input Data"
+            placeholder="Enter JSON data here"
+            multiline
+            rows={4}
+            fullWidth
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
+            sx={{ marginTop: 2 }}
+          />
+
+          {/* Import Button */}
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleImportClick}
+            sx={{ marginTop: 1 }}
+          >
+            Import
+          </Button>
         </Box>
       </Drawer>
 

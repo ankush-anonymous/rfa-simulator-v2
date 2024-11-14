@@ -4,30 +4,24 @@ import Flow from "../Components/Flow";
 import Sidebar from "../Components/Sidebar";
 
 const Dashboard = () => {
-  const addNode = useRef(null); // Reference to addNode function
-  const deleteNode = useRef(null); // Reference to deleteNode function
-  const [selectedNode, setSelectedNode] = useState(null); // Track selected node
-  const [nodes, setNodes] = useState([]); // State to track all nodes
+  const addNode = useRef(null);
+  const deleteNode = useRef(null);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [nodes, setNodes] = useState([]);
+  const [jsonInput, setJsonInput] = useState(null); // Store JSON input for Flow
 
   useEffect(() => {
-    // Clear localStorage on page load
     localStorage.clear();
   }, []);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        height: "100vh", // Full viewport height
-      }}
-    >
-      {/* Flow component takes the remaining available space */}
+    <Box sx={{ display: "flex", height: "100vh" }}>
       <Box
         sx={{
-          flex: 1, // Flexible space, takes remaining width
+          flex: 1,
           display: "flex",
           flexDirection: "column",
-          backgroundColor: "#f5f5f5", // Light background color for flow area
+          backgroundColor: "#f5f5f5",
         }}
       >
         <Flow
@@ -35,24 +29,25 @@ const Dashboard = () => {
           selectedNode={selectedNode}
           setSelectedNode={setSelectedNode}
           deleteNode={deleteNode}
-          setNodes={setNodes} // Pass setNodes to Flow
+          setNodes={setNodes}
+          jsonInput={jsonInput} // Pass JSON input to Flow
         />
       </Box>
 
-      {/* Sidebar component with a max width */}
       <Box
         sx={{
-          width: "240px", // Max width of the sidebar
+          width: "240px",
           display: "flex",
           flexDirection: "column",
-          borderLeft: "1px solid #ddd", // Optional border to separate sections
+          borderLeft: "1px solid #ddd",
         }}
       >
         <Sidebar
           addNode={addNode}
           selectedNode={selectedNode}
           deleteNode={deleteNode}
-          setNodes={setNodes} // Pass setNodes to Sidebar
+          setNodes={setNodes}
+          setJsonInput={setJsonInput} // Function to update JSON input
         />
       </Box>
     </Box>
