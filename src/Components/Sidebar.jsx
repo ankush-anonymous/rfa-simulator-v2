@@ -34,10 +34,39 @@ const Sidebar = ({
 
   const handleCalculateClick = async () => {
     try {
-      const result = await main(textInput); // Pass textInput as the input value
-      setOutput(result); // Store the output in state
+      const flowData = localStorage.getItem("flowData");
+      if (!flowData) {
+        console.warn("No flow data found in localStorage.");
+        return;
+      }
+
+      const parsedData = JSON.parse(flowData);
+      const inputValue = {
+        messages: [
+          {
+            role: "user",
+            content: `Flow data details:\n${JSON.stringify(
+              parsedData,
+              null,
+              2
+            )}`,
+          },
+        ],
+      };
+
+      const result = await main(inputValue);
+      const jsonMatch = result.match(/```([\s\S]*?)```/);
+      const jsonOutput =
+        jsonMatch && jsonMatch[1]
+          ? jsonMatch[1].trim()
+          : "No JSON output found";
+
+      const outputData = JSON.parse(jsonOutput);
+
+      // Update output state with the received data
+      setOutput(outputData);
     } catch (error) {
-      console.error("Error during calculation:", error);
+      console.error("Error during calculation:", error.message);
     }
   };
 
@@ -48,6 +77,43 @@ const Sidebar = ({
     } catch (error) {
       console.error("Invalid JSON format", error);
     }
+  };
+
+  const renderJson = (json) => {
+    return JSON.stringify(json, null, 2)
+      .split("\n")
+      .map((line, index) => {
+        // Add basic syntax coloring by checking for certain characters
+        const isKey =
+          line.includes(":") && !line.includes("{") && !line.includes("}");
+        const isString = line.includes(":") && line.includes('"');
+        const isNumber = !line.includes(":") && /\d/.test(line);
+
+        return (
+          <Typography
+            key={index}
+            component="pre"
+            sx={{
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word",
+              margin: 0,
+              fontFamily: "'Courier New', monospace",
+              backgroundColor: "#f5f5f5",
+              padding: "5px",
+              borderRadius: "5px",
+              color: isKey
+                ? "#3f51b5"
+                : isString
+                ? "#d32f2f"
+                : isNumber
+                ? "#388e3c"
+                : "#000",
+            }}
+          >
+            {line}
+          </Typography>
+        );
+      });
   };
 
   return (
@@ -142,11 +208,12 @@ const Sidebar = ({
 
           {/* Display the output below the Calculate button */}
           {output && (
-            <Box sx={{ marginTop: 2 }}>
-              <Typography variant="h6">Output:</Typography>
-              <pre style={{ whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
-                {JSON.stringify(output, null, 2)}
-              </pre>
+            <Box sx={{ marginTop: 2, maxHeight: 300, overflowY: "auto" }}>
+              <Typography variant="h6" sx={{ marginBottom: 1 }}>
+                Output:
+              </Typography>
+              {/* Render the formatted JSON */}
+              {renderJson(output)}
             </Box>
           )}
 
