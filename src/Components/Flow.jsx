@@ -246,31 +246,45 @@ const Flow = ({
   );
 
   useEffect(() => {
-    if (jsonInput && jsonInput.nodes) {
-      console.log(jsonInput);
+    if (jsonInput) {
+      // Ensure that jsonInput has nodes and connections as arrays
+      const nodes = Array.isArray(jsonInput.nodes) ? jsonInput.nodes : [];
+      const connections = Array.isArray(jsonInput.connections)
+        ? jsonInput.connections
+        : [];
 
-      jsonInput.nodes.forEach((jsonNode) => {
+      // Clear the flowData from localStorage when new jsonInput is detected
+      localStorage.removeItem("flowData");
+
+      // Clear the existing nodes and edges state before updating
+      setNodes([]); // Clear existing nodes
+      setEdges([]); // Clear existing edges
+
+      // Process nodes
+      nodes.forEach((jsonNode) => {
         handleAddNodeFromJson(jsonNode);
       });
-    }
-  }, [jsonInput, handleAddNodeFromJson]);
 
-  useEffect(() => {
-    if (jsonInput && jsonInput.connections) {
-      // Extract connections from the input
-      const newEdges = jsonInput.connections.map((conn) => ({
+      // Process connections
+      const newEdges = connections.map((conn) => ({
         id: `${conn.source}-${conn.target}`,
         source: conn.source,
         target: conn.target,
         type: "step", // or any edge type you prefer
       }));
 
-      console.log(newEdges);
-
       // Update edges state with new edges
       setEdges((prevEdges) => [...prevEdges, ...newEdges]);
+
+      // After updating nodes and edges, update flowData in localStorage
+      const updatedFlowData = {
+        nodes: [...nodes], // use nodes from jsonInput
+        connections: [...connections], // use connections from jsonInput
+      };
+
+      localStorage.setItem("flowData", JSON.stringify(updatedFlowData));
     }
-  }, [jsonInput, setEdges]);
+  }, [jsonInput, handleAddNodeFromJson, setEdges]);
 
   addNode.current = handleAddNode;
   deleteNode.current = handleDeleteNode;
