@@ -6,8 +6,10 @@ import {
   Typography,
   Divider,
   IconButton,
+  Tooltip,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { generateCircuit } from "../util/CircuitGeneratorClient";
 
 const ChatInterface = ({ onBotResponse }) => {
@@ -68,22 +70,24 @@ const ChatInterface = ({ onBotResponse }) => {
 
   // Function to extract and upload circuit JSON from a bot response
   const handleUploadCircuit = (chatId) => {
-    // Check if the chat exists in localStorage
     const chatData = localStorage.getItem(chatId);
-    console.log(chatData);
 
     if (chatData) {
       try {
-        // Parse the chat data if it's in JSON format
         const circuitData = JSON.parse(chatData);
-        // Pass the parsed data to the parent component via onBotResponse
-        onBotResponse(circuitData);
+        onBotResponse(circuitData); // Pass parsed data to parent component
       } catch (error) {
         console.error("Error parsing circuit data:", error.message);
       }
     } else {
       alert(`No chat data found for ${chatId}`);
     }
+  };
+
+  // Function to copy chat ID to clipboard
+  const handleCopyToClipboard = (chatId) => {
+    navigator.clipboard.writeText(chatId);
+    alert(`Copied: ${chatId}`);
   };
 
   return (
@@ -138,24 +142,52 @@ const ChatInterface = ({ onBotResponse }) => {
               marginBottom: 0.5,
             }}
           >
-            <Typography
-              sx={{
-                fontSize: "0.85rem",
-                color: msg.role === "user" ? "#1a73e8" : "#555",
-                flex: 1,
-              }}
-            >
-              <strong>{msg.role === "user" ? "You:" : "Bot:"}</strong>{" "}
-              {msg.content}
-            </Typography>
-            {msg.role === "bot" && (
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={() => handleUploadCircuit(msg.id)} // Pass chat ID to the handler
+            {msg.role === "user" ? (
+              <Typography
+                sx={{
+                  fontSize: "0.85rem",
+                  color: "#1a73e8",
+                  flex: 1,
+                  textAlign: "right", // Aligns user messages to the right
+                }}
               >
-                <CloudUploadIcon />
-              </IconButton>
+                <strong>You:</strong> {msg.content}
+              </Typography>
+            ) : (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: "0.85rem",
+                    color: "#555",
+                  }}
+                >
+                  <strong>Bot:</strong> {msg.id}
+                </Typography>
+                <Tooltip title="Upload Circuit">
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    onClick={() => handleUploadCircuit(msg.id)}
+                  >
+                    <CloudUploadIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Copy ID">
+                  <IconButton
+                    size="small"
+                    color="secondary"
+                    onClick={() => handleCopyToClipboard(msg.id)}
+                  >
+                    <ContentCopyIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
             )}
           </Box>
         ))}
