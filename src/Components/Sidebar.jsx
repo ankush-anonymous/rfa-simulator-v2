@@ -11,7 +11,12 @@ import config from "../util/ComponentConfig"; // Import config
 import ConfigureModal from "../Components/ConfigModal"; // Import the modal
 import { main } from "../util/groqCloud"; // Import the main function
 
-const drawerWidth = 240;
+import AppsIcon from "@mui/icons-material/Apps"; // For Components button
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome"; // For RFA AI button
+import FileUploadIcon from "@mui/icons-material/FileUpload"; // For Import JSON button
+import ChatInterface from "./ChatInterface";
+
+const drawerWidth = 300;
 
 const Sidebar = ({
   addNode,
@@ -23,6 +28,7 @@ const Sidebar = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [output, setOutput] = useState(""); // State to store the output
   const [textInput, setTextInput] = useState(""); // State for text area input
+  const [activeSection, setActiveSection] = useState("components"); // Default section
 
   const handleConfigureClick = () => {
     setIsModalOpen(true);
@@ -116,6 +122,12 @@ const Sidebar = ({
       });
   };
 
+  const handleBotResponse = (response) => {
+    console.log("Received bot response:", response);
+
+    setJsonInput(response);
+  };
+
   return (
     <>
       <Drawer
@@ -131,28 +143,42 @@ const Sidebar = ({
         anchor="right"
       >
         <Toolbar />
-        <Divider />
-
         <Box sx={{ padding: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={7}>
+            {/* Components Button */}
+            <Grid item xs={4}>
               <Button
-                variant="contained"
+                variant={
+                  activeSection === "components" ? "contained" : "outlined"
+                }
                 color="primary"
-                disabled={!selectedNode}
-                onClick={handleConfigureClick}
+                onClick={() => setActiveSection("components")}
               >
-                Configure
+                <AppsIcon /> {/* Icon for Components */}
               </Button>
             </Grid>
-            <Grid item xs={2}>
+
+            {/* RFA AI Button */}
+            <Grid item xs={4}>
               <Button
-                variant="contained"
-                color="error"
-                disabled={!selectedNode}
-                onClick={() => deleteNode.current()}
+                variant={activeSection === "rfaAI" ? "contained" : "outlined"}
+                color="secondary"
+                onClick={() => setActiveSection("rfaAI")}
               >
-                Delete
+                <AutoAwesomeIcon /> {/* Icon for RFA AI */}
+              </Button>
+            </Grid>
+
+            {/* Import JSON Button */}
+            <Grid item xs={4}>
+              <Button
+                variant={
+                  activeSection === "importJSON" ? "contained" : "outlined"
+                }
+                color="success"
+                onClick={() => setActiveSection("importJSON")}
+              >
+                <FileUploadIcon /> {/* Icon for Import JSON */}
               </Button>
             </Grid>
           </Grid>
@@ -160,85 +186,128 @@ const Sidebar = ({
 
         <Divider />
 
-        <Box sx={{ padding: 2 }}>
-          {config.items.map((item) => (
-            <Button
-              key={item.id}
-              variant="outlined"
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                width: "100%",
-                padding: "10px",
-                marginBottom: "10px",
-              }}
-              onClick={() => addNode.current(item)}
-            >
-              <img
-                src={item.image}
-                alt={item.title}
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  objectFit: "contain",
-                  marginRight: "20px",
-                }}
-              />
-              <Typography variant="subtitle1" align="center">
-                {item.title}
-              </Typography>
-            </Button>
-          ))}
-        </Box>
-
-        <Divider />
-
-        {/* Calculate Button, Text Area, and Import Button */}
-        <Box sx={{ padding: 2 }}>
-          <Button
-            id="calculate-btn"
-            variant="contained"
-            color="success"
-            onClick={handleCalculateClick} // Calculate button triggers the main function
-          >
-            Calculate
-          </Button>
-
-          {/* Display the output below the Calculate button */}
-          {output && (
-            <Box sx={{ marginTop: 2, maxHeight: 300, overflowY: "auto" }}>
-              <Typography variant="h6" sx={{ marginBottom: 1 }}>
-                Output:
-              </Typography>
-              {/* Render the formatted JSON */}
-              {renderJson(output)}
+        {/* Conditional Rendering of Sections */}
+        {activeSection === "components" && (
+          <section id="component">
+            <Box sx={{ padding: 2 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={7}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    disabled={!selectedNode}
+                    onClick={handleConfigureClick}
+                  >
+                    Configure
+                  </Button>
+                </Grid>
+                <Grid item xs={2}>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    disabled={!selectedNode}
+                    onClick={() => deleteNode.current()}
+                  >
+                    Delete
+                  </Button>
+                </Grid>
+              </Grid>
             </Box>
-          )}
 
-          {/* Text Area for input */}
-          <TextField
-            label="Input Data"
-            placeholder="Enter JSON data here"
-            multiline
-            rows={4}
-            fullWidth
-            value={textInput}
-            onChange={(e) => setTextInput(e.target.value)}
-            sx={{ marginTop: 2 }}
-          />
+            <Divider />
 
-          {/* Import Button */}
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={handleImportClick}
-            sx={{ marginTop: 1 }}
-          >
-            Import
-          </Button>
-        </Box>
+            <Box sx={{ padding: 2 }}>
+              {config.items.map((item) => (
+                <Button
+                  key={item.id}
+                  variant="outlined"
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    width: "100%",
+                    padding: "10px",
+                    marginBottom: "10px",
+                  }}
+                  onClick={() => addNode.current(item)}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      objectFit: "contain",
+                      marginRight: "20px",
+                    }}
+                  />
+                  <Typography variant="subtitle1" align="center">
+                    {item.title}
+                  </Typography>
+                </Button>
+              ))}
+            </Box>
+            {/* Calculate Button, Text Area, and Import Button */}
+            <Box sx={{ padding: 2 }}>
+              <Button
+                id="calculate-btn"
+                variant="contained"
+                color="success"
+                onClick={handleCalculateClick} // Calculate button triggers the main function
+              >
+                Calculate
+              </Button>
+
+              {/* Display the output below the Calculate button */}
+              {output && (
+                <Box sx={{ marginTop: 2, maxHeight: 300, overflowY: "auto" }}>
+                  <Typography variant="h6" sx={{ marginBottom: 1 }}>
+                    Output:
+                  </Typography>
+                  {/* Render the formatted JSON */}
+                  {renderJson(output)}
+                </Box>
+              )}
+            </Box>
+          </section>
+        )}
+
+        {activeSection === "rfaAI" && (
+          <section id="rfaAI">
+            <Box sx={{ padding: 2 }}>
+              <ChatInterface onBotResponse={handleBotResponse} />
+            </Box>
+          </section>
+        )}
+
+        {activeSection === "importJSON" && (
+          <section id="importJSON">
+            <Box sx={{ padding: 2 }}>
+              {/* Text Area for input */}
+              <TextField
+                label="Input Data"
+                placeholder="Enter JSON data here"
+                multiline
+                rows={4}
+                fullWidth
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                sx={{ marginTop: 2 }}
+              />
+
+              {/* Import Button */}
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleImportClick}
+                sx={{ marginTop: 1 }}
+              >
+                Import
+              </Button>
+            </Box>
+          </section>
+        )}
       </Drawer>
 
       {/* Configure Modal */}

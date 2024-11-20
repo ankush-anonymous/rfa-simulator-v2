@@ -46,10 +46,9 @@ const Flow = ({
     (params) => {
       const newEdge = {
         ...params,
-        id: generateNodeId("edge"), // Generate a unique id for the edge
+        id: generateNodeId("edge"),
         type: "step",
       };
-
       setEdges((eds) => addEdge(newEdge, eds));
 
       const sourceNode = nodes.find((node) => node.id === params.source);
@@ -85,7 +84,6 @@ const Flow = ({
           { source: sourceNode.id, target: targetNode.id },
         ],
       };
-
       localStorage.setItem("flowData", JSON.stringify(updatedFlowData));
       console.log("All Connections:", [...connections, connectionDetails]);
     },
@@ -249,11 +247,30 @@ const Flow = ({
 
   useEffect(() => {
     if (jsonInput && jsonInput.nodes) {
+      console.log(jsonInput);
+
       jsonInput.nodes.forEach((jsonNode) => {
         handleAddNodeFromJson(jsonNode);
       });
     }
   }, [jsonInput, handleAddNodeFromJson]);
+
+  useEffect(() => {
+    if (jsonInput && jsonInput.connections) {
+      // Extract connections from the input
+      const newEdges = jsonInput.connections.map((conn) => ({
+        id: `${conn.source}-${conn.target}`,
+        source: conn.source,
+        target: conn.target,
+        type: "step", // or any edge type you prefer
+      }));
+
+      console.log(newEdges);
+
+      // Update edges state with new edges
+      setEdges((prevEdges) => [...prevEdges, ...newEdges]);
+    }
+  }, [jsonInput, setEdges]);
 
   addNode.current = handleAddNode;
   deleteNode.current = handleDeleteNode;
