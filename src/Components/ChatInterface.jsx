@@ -11,6 +11,7 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { generateCircuit } from "../util/CircuitGeneratorClient";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const ChatInterface = ({ onBotResponse }) => {
   const [message, setMessage] = useState("");
@@ -163,7 +164,7 @@ const ChatInterface = ({ onBotResponse }) => {
                   fontSize: "0.85rem",
                   color: "#1a73e8",
                   flex: 1,
-                  textAlign: "right", // Aligns user messages to the right
+                  textAlign: "right",
                 }}
               >
                 <strong>You:</strong> {msg.content}
@@ -176,32 +177,38 @@ const ChatInterface = ({ onBotResponse }) => {
                   gap: 1,
                 }}
               >
-                <Typography
-                  sx={{
-                    fontSize: "0.85rem",
-                    color: "#555",
-                  }}
-                >
-                  <strong>Bot:</strong> {msg.id}
-                </Typography>
-                <Tooltip title="Upload Circuit">
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={() => handleUploadCircuit(msg.id)}
-                  >
-                    <CloudUploadIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Copy ID">
-                  <IconButton
-                    size="small"
-                    color="secondary"
-                    onClick={() => handleCopyToClipboard(msg.id)}
-                  >
-                    <ContentCopyIcon />
-                  </IconButton>
-                </Tooltip>
+                {msg.id === "processing" ? (
+                  <CircularProgress size={20} color="secondary" />
+                ) : (
+                  <>
+                    <Typography
+                      sx={{
+                        fontSize: "0.85rem",
+                        color: "#555",
+                      }}
+                    >
+                      <strong>Bot:</strong> {msg.id}
+                    </Typography>
+                    <Tooltip title="Upload Circuit">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleUploadCircuit(msg.id)}
+                      >
+                        <CloudUploadIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Copy ID">
+                      <IconButton
+                        size="small"
+                        color="secondary"
+                        onClick={() => handleCopyToClipboard(msg.id)}
+                      >
+                        <ContentCopyIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </>
+                )}
               </Box>
             )}
           </Box>
