@@ -86,8 +86,23 @@ const ChatInterface = ({ onBotResponse }) => {
 
   // Function to copy chat ID to clipboard
   const handleCopyToClipboard = (chatId) => {
-    navigator.clipboard.writeText(chatId);
-    alert(`Copied: ${chatId}`);
+    // Retrieve the value from localStorage
+    const chatData = localStorage.getItem(chatId);
+
+    if (chatData) {
+      // Copy the value to the clipboard
+      navigator.clipboard
+        .writeText(chatData)
+        .then(() => {
+          alert(`Copied to clipboard: `);
+        })
+        .catch((error) => {
+          console.error("Failed to copy to clipboard:", error);
+          alert("Failed to copy. Please try again.");
+        });
+    } else {
+      alert(`No data found for chat ID: ${chatId}`);
+    }
   };
 
   return (

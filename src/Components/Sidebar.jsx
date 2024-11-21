@@ -11,7 +11,9 @@ import config from "../util/ComponentConfig"; // Import config
 import ConfigureModal from "../Components/ConfigModal"; // Import the modal
 import { main } from "../util/groqCloud"; // Import the main function
 
+import Card from "@mui/material/Card";
 import AppsIcon from "@mui/icons-material/Apps"; // For Components button
+import CircularProgress from "@mui/material/CircularProgress";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome"; // For RFA AI button
 import FileUploadIcon from "@mui/icons-material/FileUpload"; // For Import JSON button
 import ChatInterface from "./ChatInterface";
@@ -29,7 +31,7 @@ const Sidebar = ({
   const [output, setOutput] = useState(""); // State to store the output
   const [textInput, setTextInput] = useState(""); // State for text area input
   const [activeSection, setActiveSection] = useState("components"); // Default section
-
+  const [isLoading, setIsLoading] = useState(false);
   const handleConfigureClick = () => {
     setIsModalOpen(true);
   };
@@ -40,6 +42,7 @@ const Sidebar = ({
 
   const handleCalculateClick = async () => {
     try {
+      setIsLoading(true);
       const flowData = localStorage.getItem("flowData");
       if (!flowData) {
         console.warn("No flow data found in localStorage.");
@@ -73,6 +76,8 @@ const Sidebar = ({
       setOutput(outputData);
     } catch (error) {
       console.error("Error during calculation:", error.message);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
@@ -254,20 +259,51 @@ const Sidebar = ({
                 id="calculate-btn"
                 variant="contained"
                 color="success"
-                onClick={handleCalculateClick} // Calculate button triggers the main function
+                onClick={handleCalculateClick} // Trigger the main function
               >
                 Calculate
               </Button>
 
-              {/* Display the output below the Calculate button */}
-              {output && (
-                <Box sx={{ marginTop: 2, maxHeight: 300, overflowY: "auto" }}>
+              {/* Show a loading spinner if processing */}
+              {isLoading && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: 2,
+                  }}
+                >
+                  <CircularProgress color="success" />
+                </Box>
+              )}
+
+              {/* Display the output in a card when available */}
+              {!isLoading && output && (
+                <Card
+                  sx={{ marginTop: 2, padding: 2, maxWidth: 400, boxShadow: 3 }}
+                >
                   <Typography variant="h6" sx={{ marginBottom: 1 }}>
                     Output:
                   </Typography>
-                  {/* Render the formatted JSON */}
-                  {renderJson(output)}
-                </Box>
+                  <Divider sx={{ marginBottom: 2 }} />
+                  <Typography variant="body2" sx={{ marginBottom: 1 }}>
+                    <strong>Total Power Consumed:</strong>{" "}
+                    {output.totalPowerConsumed} W
+                  </Typography>
+                  <Typography variant="body2" sx={{ marginBottom: 1 }}>
+                    <strong>Total Duration of System:</strong>{" "}
+                    {output.totalDurationOfSystem} hours
+                  </Typography>
+                  <Typography variant="body2" sx={{ marginBottom: 1 }}>
+                    <strong>Remaining Battery Capacity:</strong>{" "}
+                    {output.remainingBatteryCapacity} %
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Total Power Provided:</strong>{" "}
+                    {output.totalPowerProvided} W
+                  </Typography>
+                </Card>
               )}
             </Box>
           </section>

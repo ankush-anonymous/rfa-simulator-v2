@@ -122,7 +122,7 @@ ${inputData}
 Use the provided input description to generate nodes and connections based on the format above. Only return the JSON output.`;
 
     const body = {
-      model: "llama3-70b-8192",
+      model: "llama-3.1-70b-versatile",
       messages: [
         {
           role: "user",
