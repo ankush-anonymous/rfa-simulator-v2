@@ -15,7 +15,7 @@ This is how the app looks:
 
 
 You can create circuits Manually like this:
-https://github.com/user-attachments/assets/3085ea4f-3f85-4628-862f-c40721d7a0ab
+![manual circuit](https://github.com/user-attachments/assets/3085ea4f-3f85-4628-862f-c40721d7a0ab)
 
 You can create AI generated circuits like this:
 https://github.com/user-attachments/assets/e3938661-ade6-4d8b-b82a-c1f0a73be304
