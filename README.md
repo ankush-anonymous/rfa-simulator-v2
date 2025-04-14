@@ -8,9 +8,21 @@ In this, you can create circuits using AI and calculate the parameters of an ele
 
 ### Screenshots
 
-Here are some screenshots with labels:
-(You can add images below this line like so:  
-`![Label](path/to/screenshot.png)`)
+Here are some screenshots and recordings of the application with labels:
+
+This is how the app looks:
+![circuit home](https://github.com/user-attachments/assets/fb257af7-0eb7-403b-87d7-510446e564a8)
+
+
+You can create circuits Manually like this:
+https://github.com/user-attachments/assets/3085ea4f-3f85-4628-862f-c40721d7a0ab
+
+You can create AI generated circuits like this:
+https://github.com/user-attachments/assets/e3938661-ade6-4d8b-b82a-c1f0a73be304
+
+You can import a circuit using its JSON:
+https://github.com/user-attachments/assets/b4331ea1-68c1-457e-b71e-b044d1045976
+
 
 ---
 
