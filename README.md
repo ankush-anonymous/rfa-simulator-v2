@@ -18,10 +18,10 @@ You can create circuits Manually like this:
 ![manual circuit](https://github.com/user-attachments/assets/3085ea4f-3f85-4628-862f-c40721d7a0ab)
 
 You can create AI generated circuits like this:
-https://github.com/user-attachments/assets/e3938661-ade6-4d8b-b82a-c1f0a73be304
+![ai generated circuit](https://github.com/user-attachments/assets/e3938661-ade6-4d8b-b82a-c1f0a73be304)
 
 You can import a circuit using its JSON:
-https://github.com/user-attachments/assets/b4331ea1-68c1-457e-b71e-b044d1045976
+![json circuit](https://github.com/user-attachments/assets/b4331ea1-68c1-457e-b71e-b044d1045976)
 
 
 ---
